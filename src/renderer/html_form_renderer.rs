@@ -1,14 +1,33 @@
-use crate::renderer::{HtmlFieldSetRenderer, html_control::text::HtmlInput};
+use crate::renderer::{
+    HtmlFieldSetRenderer,
+    html_control::{html_input::HtmlInput, html_select::HtmlSelect},
+};
 use abstract_form::{
     Field,
+    field::field::get_validations_by_type,
     renderer::{FieldRenderer, FieldSetRenderer, FormRenderer},
+    validation::ClosedSingleChoice,
 };
+use html_escape::encode_double_quoted_attribute;
+use itertools::Itertools;
 use std::{collections::HashMap, sync::Arc};
 
 #[derive(Default)]
 pub struct HtmlFormRenderer {
-    field_renderers: HashMap<String, Arc<Box<dyn FieldRenderer>>>,
-    fieldset_renderers: HashMap<String, Arc<Box<dyn FieldSetRenderer>>>,
+    pub field_renderers: HashMap<String, Arc<Box<dyn FieldRenderer>>>,
+    pub fieldset_renderers: HashMap<String, Arc<Box<dyn FieldSetRenderer>>>,
+    pub classes: Vec<String>,
+    pub id: Option<String>,
+    pub action: Option<String>,
+    pub attributes: HashMap<String, String>,
+}
+impl HtmlFormRenderer {
+    pub fn add_class(&mut self, class: &str) {
+        self.classes.push(class.to_string());
+    }
+    pub fn add_attribute(&mut self, key: &str, value: &str) {
+        self.attributes.insert(key.to_string(), value.to_string());
+    }
 }
 impl FormRenderer for HtmlFormRenderer {
     fn field_renderers(&self) -> &HashMap<String, Arc<Box<dyn FieldRenderer>>> {
@@ -26,16 +45,51 @@ impl FormRenderer for HtmlFormRenderer {
     fn fieldset_renderers_mut(&mut self) -> &mut HashMap<String, Arc<Box<dyn FieldSetRenderer>>> {
         &mut self.fieldset_renderers
     }
-
-    fn render_form_pre(&self, form: &abstract_form::Form) -> String {
-        return "<form>".to_string();
+    fn render_form_pre(&self, _form: &abstract_form::Form) -> String {
+        let mut attributes = self.attributes.clone();
+        if let Some(action) = self.action.as_ref() {
+            attributes.insert("action".to_string(), action.clone());
+        }
+        if let Some(id) = self.id.as_ref() {
+            attributes.insert("id".to_string(), id.clone());
+        }
+        attributes.insert(
+            "class".to_string(),
+            ["sooma-form".to_string()]
+                .iter()
+                .chain(self.classes.iter())
+                .map(|class| encode_double_quoted_attribute(class))
+                .join(" "),
+        );
+        format!(
+            r#"<form {}>"#,
+            attributes
+                .iter()
+                .map(|(key, value)| format!(
+                    r#"{}="{}""#,
+                    key,
+                    encode_double_quoted_attribute(value)
+                ))
+                .join(" ")
+        )
     }
 
-    fn render_form_post(&self, form: &abstract_form::Form) -> String {
+    fn render_form_post(&self, _form: &abstract_form::Form) -> String {
         return "</form>".to_string();
     }
 
-    fn get_default_field_renderer(&self, field: &Field) -> Arc<Box<dyn FieldRenderer>> {
+    fn get_default_field_renderer(
+        &self,
+        field: &std::sync::Arc<Box<dyn Field>>,
+    ) -> Arc<Box<dyn FieldRenderer>> {
+        if field.inner_type_id() == std::any::TypeId::of::<bool>() {
+            return Arc::new(Box::new(HtmlSelect::default()));
+        }
+        if get_validations_by_type::<ClosedSingleChoice<String>>(field).count() > 0
+            || get_validations_by_type::<ClosedSingleChoice<bool>>(field).count() > 0
+        {
+            return Arc::new(Box::new(HtmlSelect::default()));
+        }
         Arc::new(Box::new(HtmlInput::default()))
     }
 
