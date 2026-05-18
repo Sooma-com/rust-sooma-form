@@ -4,7 +4,7 @@ use crate::renderer::{
 };
 use abstract_form::{
     Field,
-    field::field::get_validations_by_type,
+    field::get_validations_by_type,
     renderer::{FieldRenderer, FieldSetRenderer, FormRenderer},
     validation::ClosedSingleChoice,
 };
@@ -75,7 +75,7 @@ impl FormRenderer for HtmlFormRenderer {
     }
 
     fn render_form_post(&self, _form: &abstract_form::Form) -> String {
-        return "</form>".to_string();
+        "</form>".to_string()
     }
 
     fn get_default_field_renderer(

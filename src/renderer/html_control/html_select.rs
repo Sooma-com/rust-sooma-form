@@ -1,6 +1,5 @@
 use abstract_form::{
-    Validation, field::field::get_validations_by_type, renderer::FieldRenderer,
-    validation::ClosedSingleChoice,
+    field::get_validations_by_type, renderer::FieldRenderer, validation::ClosedSingleChoice,
 };
 use html_escape::{encode_double_quoted_attribute, encode_safe};
 use itertools::Itertools;
