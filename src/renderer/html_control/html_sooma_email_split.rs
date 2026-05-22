@@ -28,15 +28,6 @@ impl FieldRenderer for HtmlSoomaEmailSplit {
             encode_double_quoted_attribute(&self.domain_field_name),
         );
         let error_container = r#"<div class="error-message no-error"></div>"#.to_string();
-        // let error_container = if field.get_tag() == "parent" {
-        //     format!(r#"<div class="error-message warning">This is a warning</div>"#)
-        // } else if field.get_tag() == "last_access" {
-        //     format!(r#"<div class="error-message error">This is an error</div>"#)
-        // } else if field.get_tag() == "sync_guid" {
-        //     format!(r#"<div class="error-message info">This is an info</div>"#)
-        // } else {
-        //     format!(r#"<div class="error-message no-error"></div>"#)
-        // };
         format!(
             r#"<div class="{}" data-name="{}">{label}{input}{error_container}</div>"#,
             ["sooma-form-control".to_string()]

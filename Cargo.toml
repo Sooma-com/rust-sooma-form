@@ -8,3 +8,4 @@ abstract_form = { path = "../abstract_form", features = ["chrono"] }
 html-escape = "0.2.13"
 itertools = "0.14.0"
 log = "0.4.29"
+indexmap = "2.14"
