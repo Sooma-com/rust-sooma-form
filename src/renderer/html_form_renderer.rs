@@ -8,7 +8,7 @@ use abstract_form::{
     renderer::{FieldRenderer, FieldSetRenderer, FormRenderer},
     validation::ClosedSingleChoice,
 };
-use html_escape::encode_double_quoted_attribute;
+use html_escape::{encode_double_quoted_attribute, encode_safe};
 use itertools::Itertools;
 use std::{collections::HashMap, sync::Arc};
 
@@ -20,6 +20,7 @@ pub struct HtmlFormRenderer {
     pub id: Option<String>,
     pub action: Option<String>,
     pub attributes: HashMap<String, String>,
+    pub submit: Vec<(String, String)>,
 }
 impl HtmlFormRenderer {
     pub fn add_class(&mut self, class: &str) {
@@ -27,6 +28,9 @@ impl HtmlFormRenderer {
     }
     pub fn add_attribute(&mut self, key: &str, value: &str) {
         self.attributes.insert(key.to_string(), value.to_string());
+    }
+    pub fn add_submit(&mut self, label: &str, value: &str) {
+        self.submit.push((label.to_string(), value.to_string()));
     }
 }
 impl FormRenderer for HtmlFormRenderer {
@@ -75,7 +79,18 @@ impl FormRenderer for HtmlFormRenderer {
     }
 
     fn render_form_post(&self, _form: &abstract_form::Form) -> String {
-        "</form>".to_string()
+        format!(
+            r#"
+<span class="submit-buttons">{}</span></form>
+            "#,
+            self.submit
+            .iter()
+            .map(|(action, label)| format!(r#"<button type="submit" class="submit submit-{} "name="submit" value="{}">{}</button>"#, 
+                encode_double_quoted_attribute(action),
+                encode_double_quoted_attribute(action),
+                encode_safe(label)))
+            .join(" ")
+        )
     }
 
     fn get_default_field_renderer(
