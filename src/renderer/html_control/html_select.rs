@@ -1,3 +1,4 @@
+use crate::renderer::html_control::sergiosgc_enc;
 use abstract_form::{
     field::get_validations_by_type, renderer::FieldRenderer, validation::ClosedSingleChoice,
 };
@@ -58,8 +59,9 @@ impl FieldRenderer for HtmlSelect {
                 }
             };
             let open_tag = format!(
-                r#"<select name="{}">"#,
-                encode_double_quoted_attribute(field.get_tag())
+                r#"<select name="{}" sergiosgc-enc="{}">"#,
+                encode_double_quoted_attribute(field.get_tag()),
+                sergiosgc_enc(field)
             );
             let mut option_tags = Vec::<String>::new();
             for (key, value) in options {

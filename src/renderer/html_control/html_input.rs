@@ -1,3 +1,4 @@
+use crate::renderer::html_control::sergiosgc_enc;
 use abstract_form::renderer::FieldRenderer;
 use html_escape::{encode_double_quoted_attribute, encode_safe};
 use itertools::Itertools;
@@ -21,9 +22,10 @@ impl FieldRenderer for HtmlInput {
             encode_safe(&field.get_label())
         );
         let input = format!(
-            r#"<input type="text" name="{}" value="{}" />"#,
+            r#"<input type="text" name="{}" value="{}" sergiosgc-enc="{}" />"#,
             encode_double_quoted_attribute(field.get_tag()),
-            encode_double_quoted_attribute(&field.get_value_as_string())
+            encode_double_quoted_attribute(&field.get_value_as_string()),
+            sergiosgc_enc(field)
         );
         let error_container = r#"<div class="error-message no-error"></div>"#.to_string();
         // let error_container = if field.get_tag() == "parent" {

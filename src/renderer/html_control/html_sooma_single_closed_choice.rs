@@ -1,3 +1,4 @@
+use crate::renderer::html_control::sergiosgc_enc;
 use abstract_form::{
     field::get_validations_by_type, renderer::FieldRenderer, validation::ClosedSingleChoice,
 };
@@ -58,9 +59,10 @@ impl FieldRenderer for HtmlSoomaSingleClosedChoice {
                 }
             };
             let open_tag = format!(
-                r#"<sooma-single-closed-choice name="{}" value="{}">"#,
+                r#"<sooma-single-closed-choice name="{}" value="{}" sergiosgc-enc="{}">"#,
                 encode_double_quoted_attribute(field.get_tag()),
-                encode_double_quoted_attribute(&field.get_value_as_string())
+                encode_double_quoted_attribute(&field.get_value_as_string()),
+                sergiosgc_enc(field)
             );
             let mut option_tags = Vec::<String>::new();
             for (key, value) in options {

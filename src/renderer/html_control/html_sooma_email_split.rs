@@ -22,7 +22,7 @@ impl FieldRenderer for HtmlSoomaEmailSplit {
             encode_safe(&field.get_label())
         );
         let input = format!(
-            r#"<sooma-email-split type="text" name="{}" value="{}" name-domain="{}"><option value="2">example.com</option><option value="1">sooma.com</option></sooma-email-split>"#,
+            r#"<sooma-email-split type="text" name="{}" value="{}" name-domain="{}" sergiosgc-enc="string"><option value="2">example.com</option><option value="1">sooma.com</option></sooma-email-split>"#,
             encode_double_quoted_attribute(field.get_tag()),
             encode_double_quoted_attribute(&field.get_value_as_string()),
             encode_double_quoted_attribute(&self.domain_field_name),
