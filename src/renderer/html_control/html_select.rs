@@ -10,6 +10,7 @@ use std::collections::HashMap;
 pub struct HtmlSelect {
     pub id: Option<String>,
     pub classes: Vec<String>,
+    pub options: Option<HashMap<String, String>>,
 }
 impl FieldRenderer for HtmlSelect {
     fn render(
@@ -25,36 +26,41 @@ impl FieldRenderer for HtmlSelect {
             encode_safe(&field.get_label())
         );
         let input = {
-            let options: HashMap<String, String> = match (
-                get_validations_by_type::<ClosedSingleChoice<String>>(field).next(),
-                get_validations_by_type::<ClosedSingleChoice<bool>>(field).next(),
-            ) {
-                (Some(validation), _) => validation
-                    .as_any()
-                    .downcast_ref::<ClosedSingleChoice<String>>()
-                    .unwrap()
-                    .options
-                    .iter()
-                    .map(|(value, label)| (value.to_string(), label.clone()))
-                    .collect(),
-                (_, Some(validation)) => validation
-                    .as_any()
-                    .downcast_ref::<ClosedSingleChoice<bool>>()
-                    .unwrap()
-                    .options
-                    .iter()
-                    .map(|(value, label)| (value.to_string(), label.clone()))
-                    .collect(),
-                (None, None) => {
-                    if field.inner_type_id() == std::any::TypeId::of::<bool>() {
-                        [
-                            ("true".to_string(), "True".to_string()),
-                            ("false".to_string(), "False".to_string()),
-                        ]
-                        .into_iter()
-                        .collect()
-                    } else {
-                        HashMap::new()
+            let options = match &self.options {
+                Some(options) => options.clone(),
+                None => {
+                    match (
+                        get_validations_by_type::<ClosedSingleChoice<String>>(field).next(),
+                        get_validations_by_type::<ClosedSingleChoice<bool>>(field).next(),
+                    ) {
+                        (Some(validation), _) => validation
+                            .as_any()
+                            .downcast_ref::<ClosedSingleChoice<String>>()
+                            .unwrap()
+                            .options
+                            .iter()
+                            .map(|(value, label)| (value.to_string(), label.clone()))
+                            .collect(),
+                        (_, Some(validation)) => validation
+                            .as_any()
+                            .downcast_ref::<ClosedSingleChoice<bool>>()
+                            .unwrap()
+                            .options
+                            .iter()
+                            .map(|(value, label)| (value.to_string(), label.clone()))
+                            .collect(),
+                        (None, None) => {
+                            if field.inner_type_id() == std::any::TypeId::of::<bool>() {
+                                [
+                                    ("true".to_string(), "True".to_string()),
+                                    ("false".to_string(), "False".to_string()),
+                                ]
+                                .into_iter()
+                                .collect()
+                            } else {
+                                HashMap::new()
+                            }
+                        }
                     }
                 }
             };
