@@ -7,6 +7,7 @@ use itertools::Itertools;
 pub struct HtmlInput {
     pub id: Option<String>,
     pub classes: Vec<String>,
+    pub r#type: Option<String>,
 }
 impl FieldRenderer for HtmlInput {
     fn render(
@@ -22,7 +23,8 @@ impl FieldRenderer for HtmlInput {
             encode_safe(&field.get_label())
         );
         let input = format!(
-            r#"<input type="text" name="{}" value="{}" sergiosgc-enc="{}" />"#,
+            r#"<input type="{}" name="{}" value="{}" sergiosgc-enc="{}" />"#,
+            encode_double_quoted_attribute(self.r#type.as_deref().unwrap_or("text")),
             encode_double_quoted_attribute(field.get_tag()),
             encode_double_quoted_attribute(&field.get_value_as_string()),
             sergiosgc_enc(field)
