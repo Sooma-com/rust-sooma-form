@@ -97,7 +97,9 @@ impl FormRenderer for HtmlFormRenderer {
         &self,
         field: &std::sync::Arc<Box<dyn Field>>,
     ) -> Arc<Box<dyn FieldRenderer>> {
-        if field.inner_type_id() == std::any::TypeId::of::<bool>() {
+        if field.inner_type_id() == std::any::TypeId::of::<bool>()
+            || field.inner_type_id() == std::any::TypeId::of::<Option<bool>>()
+        {
             return Arc::new(Box::new(HtmlSelect::default()));
         }
         if get_validations_by_type::<ClosedSingleChoice<String>>(field).count() > 0
