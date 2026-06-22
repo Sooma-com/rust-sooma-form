@@ -5,11 +5,13 @@ use abstract_form::{
 use html_escape::{encode_double_quoted_attribute, encode_safe};
 use indexmap::IndexMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct HtmlSoomaMultipleClosedChoice {
     pub id: Option<String>,
     pub classes: Vec<String>,
+    pub attributes: HashMap<String, String>,
 }
 impl FieldRenderer for HtmlSoomaMultipleClosedChoice {
     fn render(
@@ -58,11 +60,22 @@ impl FieldRenderer for HtmlSoomaMultipleClosedChoice {
                     }
                 }
             };
+            let mut attributes = self.attributes.clone();
+            attributes
+                .entry("sergiosgc-enc".to_string())
+                .or_insert(sergiosgc_enc(field).to_string());
             let open_tag = format!(
-                r#"<sooma-multiple-closed-choice name="{}" value="{}" sergiosgc-enc="{}">"#,
-                encode_double_quoted_attribute(field.get_tag()),
-                encode_double_quoted_attribute(&field.get_value_as_string()),
-                sergiosgc_enc(field)
+                r#"<sooma-multiple-closed-choice name="{name}" value="{value}" {attributes}">"#,
+                name = encode_double_quoted_attribute(field.get_tag()),
+                value = encode_double_quoted_attribute(&field.get_value_as_string()),
+                attributes = self
+                    .attributes
+                    .iter()
+                    .map(|(key, value)| format!(
+                        r#"{key}="{encoded_value}""#,
+                        encoded_value = encode_double_quoted_attribute(value)
+                    ))
+                    .join(" "),
             );
             let mut option_tags = Vec::<String>::new();
             for (key, value) in options {
