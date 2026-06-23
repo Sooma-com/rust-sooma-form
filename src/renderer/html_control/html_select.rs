@@ -3,14 +3,14 @@ use abstract_form::{
     field::get_validations_by_type, renderer::FieldRenderer, validation::ClosedSingleChoice,
 };
 use html_escape::{encode_double_quoted_attribute, encode_safe};
+use indexmap::IndexMap;
 use itertools::Itertools;
-use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct HtmlSelect {
     pub id: Option<String>,
     pub classes: Vec<String>,
-    pub options: Option<HashMap<String, String>>,
+    pub options: Option<IndexMap<String, String>>,
 }
 impl FieldRenderer for HtmlSelect {
     fn render(
@@ -58,7 +58,7 @@ impl FieldRenderer for HtmlSelect {
                                 .into_iter()
                                 .collect()
                             } else {
-                                HashMap::new()
+                                IndexMap::new()
                             }
                         }
                     }
