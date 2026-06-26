@@ -1,6 +1,7 @@
 use abstract_form::renderer::FieldRenderer;
 use html_escape::{encode_double_quoted_attribute, encode_safe};
 use itertools::Itertools;
+use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct HtmlSoomaImageCrop {
@@ -8,7 +9,7 @@ pub struct HtmlSoomaImageCrop {
     pub classes: Vec<String>,
     pub width: u32,
     pub height: u32,
-    pub json_enconding: Option<String>,
+    pub attributes: HashMap<String, String>,
 }
 impl FieldRenderer for HtmlSoomaImageCrop {
     fn render(
@@ -23,13 +24,23 @@ impl FieldRenderer for HtmlSoomaImageCrop {
             encode_double_quoted_attribute(field.get_tag()),
             encode_safe(&field.get_label())
         );
+        let mut attributes = self.attributes.clone();
+        attributes
+            .entry("sergiosgc-enc".to_string())
+            .or_insert("string".to_string());
         let input = format!(
-            r#"<sooma-image-crop name="{}" value="{}" sergiosgc-enc="{}" width="{}" height="{}"></sooma-image-crop>"#,
-            encode_double_quoted_attribute(field.get_tag()),
-            encode_double_quoted_attribute(&field.get_value_as_string()),
-            self.json_enconding.as_deref().unwrap_or("string"),
-            self.width,
-            self.height,
+            r#"<sooma-image-crop name="{name}" value="{value}" {attributes} width="{width}" height="{height}"></sooma-image-crop>"#,
+            name = encode_double_quoted_attribute(field.get_tag()),
+            value = encode_double_quoted_attribute(&field.get_value_as_string()),
+            attributes = attributes
+                .iter()
+                .map(|(key, value)| format!(
+                    r#"{key}="{encoded_value}""#,
+                    encoded_value = encode_double_quoted_attribute(value)
+                ))
+                .join(" "),
+            width = self.width,
+            height = self.height,
         );
         let error_container = r#"<div class="error-message no-error"></div>"#.to_string();
         format!(

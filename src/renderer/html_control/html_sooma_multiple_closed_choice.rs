@@ -65,11 +65,10 @@ impl FieldRenderer for HtmlSoomaMultipleClosedChoice {
                 .entry("sergiosgc-enc".to_string())
                 .or_insert(sergiosgc_enc(field).to_string());
             let open_tag = format!(
-                r#"<sooma-multiple-closed-choice name="{name}" value="{value}" {attributes}">"#,
+                r#"<sooma-multiple-closed-choice name="{name}" value="{value}" {attributes}>"#,
                 name = encode_double_quoted_attribute(field.get_tag()),
                 value = encode_double_quoted_attribute(&field.get_value_as_string()),
-                attributes = self
-                    .attributes
+                attributes = attributes
                     .iter()
                     .map(|(key, value)| format!(
                         r#"{key}="{encoded_value}""#,

@@ -5,12 +5,14 @@ use abstract_form::{
 use html_escape::{encode_double_quoted_attribute, encode_safe};
 use indexmap::IndexMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct HtmlSelect {
     pub id: Option<String>,
     pub classes: Vec<String>,
     pub options: Option<IndexMap<String, String>>,
+    pub attributes: HashMap<String, String>,
 }
 impl FieldRenderer for HtmlSelect {
     fn render(
@@ -64,10 +66,20 @@ impl FieldRenderer for HtmlSelect {
                     }
                 }
             };
+            let mut attributes = self.attributes.clone();
+            attributes
+                .entry("sergiosgc-enc".to_string())
+                .or_insert(sergiosgc_enc(field).to_string());
             let open_tag = format!(
-                r#"<select name="{}" sergiosgc-enc="{}">"#,
+                r#"<select name="{}" {attributes}>"#,
                 encode_double_quoted_attribute(field.get_tag()),
-                sergiosgc_enc(field)
+                attributes = attributes
+                    .iter()
+                    .map(|(key, value)| format!(
+                        r#"{key}="{encoded_value}""#,
+                        encoded_value = encode_double_quoted_attribute(value)
+                    ))
+                    .join(" "),
             );
             let mut option_tags = Vec::<String>::new();
             for (key, value) in options {

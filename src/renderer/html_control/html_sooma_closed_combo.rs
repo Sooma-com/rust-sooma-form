@@ -1,12 +1,14 @@
 use abstract_form::renderer::FieldRenderer;
 use html_escape::{encode_double_quoted_attribute, encode_safe};
 use itertools::Itertools;
+use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct HtmlSoomaClosedCombo {
     pub id: Option<String>,
     pub classes: Vec<String>,
     pub closed_choices: Vec<(String, String)>,
+    pub attributes: HashMap<String, String>,
 }
 impl FieldRenderer for HtmlSoomaClosedCombo {
     fn render(
@@ -36,18 +38,30 @@ impl FieldRenderer for HtmlSoomaClosedCombo {
             std::any::TypeId::of::<usize>(),
         ];
         let float_type_ids = [std::any::TypeId::of::<f32>(), std::any::TypeId::of::<f64>()];
-        let input = format!(
-            r#"<sooma-closed-combo name="{}" value="{}" sergiosgc-enc="{}">{}</sooma-closed-combo>"#,
-            encode_double_quoted_attribute(field.get_tag()),
-            encode_double_quoted_attribute(&field.get_value_as_string()),
+        let mut attributes = self.attributes.clone();
+        attributes.entry("sergiosgc-enc".to_string()).or_insert(
             if integer_type_ids.contains(&field.inner_type_id()) {
                 "integer"
             } else if float_type_ids.contains(&field.inner_type_id()) {
                 "float"
             } else {
                 "string"
-            },
-            self.closed_choices
+            }
+            .to_string(),
+        );
+        let input = format!(
+            r#"<sooma-closed-combo name="{name}" value="{value}" {attributes}>{options}</sooma-closed-combo>"#,
+            name = encode_double_quoted_attribute(field.get_tag()),
+            value = encode_double_quoted_attribute(&field.get_value_as_string()),
+            attributes = attributes
+                .iter()
+                .map(|(key, value)| format!(
+                    r#"{key}="{encoded_value}""#,
+                    encoded_value = encode_double_quoted_attribute(value)
+                ))
+                .join(" "),
+            options = self
+                .closed_choices
                 .iter()
                 .map(|(value, label)| format!(
                     r#"<option value="{}">{}</option>"#,
