@@ -12,6 +12,7 @@ pub struct HtmlSoomaMultipleClosedChoice {
     pub id: Option<String>,
     pub classes: Vec<String>,
     pub attributes: HashMap<String, String>,
+    pub options: Option<IndexMap<String, String>>,
 }
 impl FieldRenderer for HtmlSoomaMultipleClosedChoice {
     fn render(
@@ -27,39 +28,42 @@ impl FieldRenderer for HtmlSoomaMultipleClosedChoice {
             encode_safe(&field.get_label())
         );
         let input = {
-            let options: IndexMap<String, String> = match (
-                get_validations_by_type::<ClosedMultipleChoice<String>>(field).next(),
-                get_validations_by_type::<ClosedMultipleChoice<bool>>(field).next(),
-            ) {
-                (Some(validation), _) => validation
-                    .as_any()
-                    .downcast_ref::<ClosedMultipleChoice<String>>()
-                    .unwrap()
-                    .options
-                    .iter()
-                    .map(|(value, label)| (value.to_string(), label.clone()))
-                    .collect(),
-                (_, Some(validation)) => validation
-                    .as_any()
-                    .downcast_ref::<ClosedMultipleChoice<bool>>()
-                    .unwrap()
-                    .options
-                    .iter()
-                    .map(|(value, label)| (value.to_string(), label.clone()))
-                    .collect(),
-                (None, None) => {
-                    if field.inner_type_id() == std::any::TypeId::of::<bool>() {
-                        [
-                            ("true".to_string(), "True".to_string()),
-                            ("false".to_string(), "False".to_string()),
-                        ]
-                        .into_iter()
-                        .collect()
-                    } else {
-                        IndexMap::new()
+            let options: IndexMap<String, String> =
+                self.options.clone().unwrap_or_else(|| {
+                    match (
+                        get_validations_by_type::<ClosedMultipleChoice<String>>(field).next(),
+                        get_validations_by_type::<ClosedMultipleChoice<bool>>(field).next(),
+                    ) {
+                        (Some(validation), _) => validation
+                            .as_any()
+                            .downcast_ref::<ClosedMultipleChoice<String>>()
+                            .unwrap()
+                            .options
+                            .iter()
+                            .map(|(value, label)| (value.to_string(), label.clone()))
+                            .collect(),
+                        (_, Some(validation)) => validation
+                            .as_any()
+                            .downcast_ref::<ClosedMultipleChoice<bool>>()
+                            .unwrap()
+                            .options
+                            .iter()
+                            .map(|(value, label)| (value.to_string(), label.clone()))
+                            .collect(),
+                        (None, None) => {
+                            if field.inner_type_id() == std::any::TypeId::of::<bool>() {
+                                [
+                                    ("true".to_string(), "True".to_string()),
+                                    ("false".to_string(), "False".to_string()),
+                                ]
+                                .into_iter()
+                                .collect()
+                            } else {
+                                IndexMap::new()
+                            }
+                        }
                     }
-                }
-            };
+                });
             let mut attributes = self.attributes.clone();
             attributes
                 .entry("sergiosgc-enc".to_string())
