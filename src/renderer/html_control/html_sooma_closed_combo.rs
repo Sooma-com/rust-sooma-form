@@ -3,6 +3,8 @@ use html_escape::{encode_double_quoted_attribute, encode_safe};
 use itertools::Itertools;
 use std::collections::HashMap;
 
+use crate::renderer::html_control::html_control_render;
+
 #[derive(Default)]
 pub struct HtmlSoomaClosedCombo {
     pub id: Option<String>,
@@ -18,11 +20,6 @@ impl FieldRenderer for HtmlSoomaClosedCombo {
         _fieldset: &abstract_form::FieldSet,
         field: &std::sync::Arc<Box<dyn abstract_form::Field>>,
     ) -> String {
-        let label = format!(
-            r#"<label for="{}">{}</label>"#,
-            encode_double_quoted_attribute(field.get_tag()),
-            encode_safe(&field.get_label())
-        );
         let integer_type_ids = [
             std::any::TypeId::of::<i8>(),
             std::any::TypeId::of::<i16>(),
@@ -55,6 +52,7 @@ impl FieldRenderer for HtmlSoomaClosedCombo {
             value = encode_double_quoted_attribute(&field.get_value_as_string()),
             attributes = attributes
                 .iter()
+                .filter(|(key, _)| !key.starts_with('/'))
                 .map(|(key, value)| format!(
                     r#"{key}="{encoded_value}""#,
                     encoded_value = encode_double_quoted_attribute(value)
@@ -70,15 +68,15 @@ impl FieldRenderer for HtmlSoomaClosedCombo {
                 ))
                 .join("")
         );
-        let error_container = r#"<div class="error-message no-error"></div>"#.to_string();
-        format!(
-            r#"<div class="{}" data-name="{}">{label}{input}{error_container}</div>"#,
+        html_control_render(
+            &input,
             ["sooma-form-control".to_string()]
                 .iter()
                 .chain(self.classes.iter())
-                .map(|class| encode_double_quoted_attribute(class))
-                .join(" "),
-            encode_double_quoted_attribute(field.get_tag()),
+                .cloned(),
+            field,
+            vec![],
+            self.attributes.clone(),
         )
     }
 }
