@@ -1,5 +1,6 @@
 use abstract_form::renderer::FieldRenderer;
 use html_escape::{encode_double_quoted_attribute, encode_safe};
+use indexmap::IndexMap;
 use itertools::Itertools;
 
 #[derive(Default)]
@@ -7,6 +8,7 @@ pub struct HtmlSoomaEmailSplit {
     pub id: Option<String>,
     pub classes: Vec<String>,
     pub domain_field_name: String,
+    pub options: Option<IndexMap<String, String>>,
 }
 impl FieldRenderer for HtmlSoomaEmailSplit {
     fn render(
@@ -21,11 +23,24 @@ impl FieldRenderer for HtmlSoomaEmailSplit {
             encode_double_quoted_attribute(field.get_tag()),
             encode_safe(&field.get_label())
         );
+        let options = self
+            .options
+            .clone()
+            .unwrap_or_default()
+            .iter()
+            .map(|(value, label)| {
+                format!(
+                    r#"<option value="{}">{}</option>"#,
+                    encode_double_quoted_attribute(value),
+                    encode_safe(label)
+                )
+            })
+            .join("");
         let input = format!(
-            r#"<sooma-email-split type="text" name="{}" value="{}" name-domain="{}" sergiosgc-enc="string"><option value="2">example.com</option><option value="1">sooma.com</option></sooma-email-split>"#,
-            encode_double_quoted_attribute(field.get_tag()),
-            encode_double_quoted_attribute(&field.get_value_as_string()),
-            encode_double_quoted_attribute(&self.domain_field_name),
+            r#"<sooma-email-split type="text" name="{name}" value="{value}" name-domain="{name_domain}" sergiosgc-enc="string">{options}</sooma-email-split>"#,
+            name = encode_double_quoted_attribute(field.get_tag()),
+            value = encode_double_quoted_attribute(&field.get_value_as_string()),
+            name_domain = encode_double_quoted_attribute(&self.domain_field_name),
         );
         let error_container = r#"<div class="error-message no-error"></div>"#.to_string();
         format!(
