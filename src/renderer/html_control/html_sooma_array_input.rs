@@ -35,7 +35,16 @@ impl FieldRenderer for HtmlSoomaArrayInput {
         let outer_input = format!(
             r#"<sooma-array name="{name}" value="{value}" {attributes}>{inner_input}</sooma-array>"#,
             name = encode_double_quoted_attribute(field.get_tag()),
-            value = encode_double_quoted_attribute(&field.get_value_as_string()),
+            // The sooma-array web component splits its value attribute on
+            // newlines, while ArrayValue::get_value_as_string joins with commas
+            value = encode_double_quoted_attribute(
+                &field
+                    .get_value_as_string()
+                    .split(',')
+                    .map(str::trim)
+                    .filter(|item| !item.is_empty())
+                    .join("\n")
+            ),
             attributes = self
                 .attributes
                 .iter()
