@@ -1,9 +1,8 @@
+use crate::renderer::html_control::html_control_render;
 use abstract_form::renderer::FieldRenderer;
 use html_escape::{encode_double_quoted_attribute, encode_safe};
 use itertools::Itertools;
 use std::collections::HashMap;
-
-use crate::renderer::html_control::html_control_render;
 
 #[derive(Default)]
 pub struct HtmlSoomaClosedCombo {
