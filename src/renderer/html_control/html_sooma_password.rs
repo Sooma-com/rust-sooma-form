@@ -108,7 +108,6 @@ impl FieldRenderer for HtmlSoomaPassword {
                 ))
                 .join(" "),
         );
-        log::debug!("input: {}", input);
         html_control_render(
             &input,
             ["sooma-form-control".to_string()]
