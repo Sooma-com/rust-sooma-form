@@ -86,7 +86,7 @@ pub fn html_control_render(
                         Severity::Warning => "warning",
                         Severity::Error => "error",
                     },
-                    message = &message.message
+                    message = message.message
                 ))
                 .join("")
         )
