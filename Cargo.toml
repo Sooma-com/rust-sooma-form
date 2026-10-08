@@ -2,10 +2,15 @@
 name = "sooma_form"
 version = "0.1.0"
 edition = "2024"
+build = "src/build.rs"
 
 [dependencies]
 abstract_form = { path = "../abstract_form", features = ["chrono"] }
+axum_gettext = { path = "../axum_gettext" }
 html-escape = "0.2.13"
 itertools = "0.14.0"
 log = "0.4.29"
 indexmap = "2.14"
+
+[build-dependencies]
+axum_gettext = { path = "../axum_gettext" }
